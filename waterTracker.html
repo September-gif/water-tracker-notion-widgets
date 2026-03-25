@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .card {
+            width: 140px;
+            height: 160px;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .count {
+            font-size: 32px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: #4da6ff;
+            transition: height 0.4s ease;
+            opacity: 0.3;
+        }
+
+        .running .wave {
+            background: #6dd56d;
+        }
+
+        .reset {
+            position: absolute;
+            bottom: 6px;
+            font-size: 11px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card" onclick="add('water')">
+            <div class="wave" id="waterWave"></div>
+            <div class="count" id="waterCount">0</div>
+            <div class="title">💧 / 8 cups</div>
+            <div class="reset" onclick="reset(event,'water')">reset</div>
+        </div>
+
+        <div class="card running" onclick="add('run')">
+            <div class="wave" id="runWave"></div>
+            <div class="count" id="runCount">0</div>
+            <div class="title">🏃 / 5 times</div>
+            <div class="reset" onclick="reset(event,'run')">reset</div>
+        </div>
+    </div>
+
+    <script>
+        const max = {
+            water: 8,
+            run: 5
+        };
+
+        function todayKey() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        // 初始化
+        let data = JSON.parse(localStorage.getItem("habitData")) || {
+            date: todayKey(),
+            water: 0,
+            run: 0
+        };
+
+        // 自动每日重置
+        if (data.date !== todayKey()) {
+            data = {
+                date: todayKey(),
+                water: 0,
+                run: 0
+            };
+        }
+
+        function save() {
+            localStorage.setItem("habitData", JSON.stringify(data));
+        }
+
+        function add(type) {
+            if (data[type] < max[type]) {
+                data[type]++;
+            } else {
+                data[type] = 0;
+            }
+            update();
+            save();
+        }
+
+        function reset(e, type) {
+            e.stopPropagation();
+            data[type] = 0;
+            update();
+            save();
+        }
+
+        function update() {
+            document.getElementById("waterCount").innerText = data.water;
+            document.getElementById("runCount").innerText = data.run;
+
+            document.getElementById("waterWave").style.height =
+                (data.water / max.water * 100) + "%";
+
+            document.getElementById("runWave").style.height =
+                (data.run / max.run * 100) + "%";
+        }
+
+        update();
+    </script>
+
+</body>
+
+</html>
